@@ -4,34 +4,26 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.support.select import Select
 
+from src.credentials import USERNAME, PASSWORD
+from src.vars import full_auth_url, full_booking_url
+from src.funcs import system_log_in
 
+# TODO: get basic tee booking working using selenium chromedriver
+# TODO: make headless
+# TODO: schedule on AWS lambda
+# TODO: create web front-end
+# TODO: allow user log-in
+# TODO: allow scheduling for now or at soonest available point
 
-# dynamic
+# dynamic variables
 booking_date = str("29-11-2022")
 
-# static
-url_base = "https://www.midsussexgolfclub.co.uk/"
-url_booking_ext = f"memberbooking/?date={booking_date}"
-url_authentication = ""
+# setting up the chrome webdriver
+DRIVER = webdriver.Chrome(executable_path = r'../resources/chromedriver')
 
-	
-## create an object of the chrome webdriver
-driver = webdriver.Chrome(executable_path = r'../resources/chromedriver')
-driver.get('https://www.selenium.dev/')
+# logging in to the webpage
+system_log_in(DRIVER, full_auth_url, USERNAME, PASSWORD)
 
-def get_html_document(url):
-    """
-    Function to return the websites soup
-    Params:
-        url: URL of website to scrape
-    Returns:
-        response: BS4 soup output
-    """
-    response = requests.get(url)
-    return response.text
-
-html_document = get_html_document(url_base+url_booking_ext)
-soup = BeautifulSoup(html_document)
 
 def get_time_to_book(desired_tee_date, 
                      desired_tee_time, 
@@ -49,9 +41,7 @@ def system_log_out():
     # function to log out to the system
     ...
 
-def system_log_in():
-    # function to log in to the system
-    ...
+
 
 def get_available_tee_times(_soup):
     """
