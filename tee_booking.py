@@ -12,7 +12,6 @@ from src.funcs import (
 # setting up the chrome webdriver
 driver = webdriver.Chrome(executable_path = r'../resources/chromedriver')
 
-
 # logging in to the webpage
 system_log_in(driver, FULL_AUTH_URL, USERNAME, PASSWORD)
 
@@ -27,17 +26,17 @@ available_tee_times = get_available_tee_times(parsed_html)
 
 from selenium.webdriver.common.by import By
 driver.get(BOOKING_URL_WITH_DATE)
+time.sleep(1)
 tee_time_mm = str('00')
 tee_time_hh = str('07')
 tee_time_str = f'teetime-mins-{tee_time_mm} teetime-hours-{tee_time_hh}'
-text_xpath = f'//tr[contains(@class, "{tee_time_str}")]//td'
+text_xpath = f'//tr[contains(@class, "{tee_time_str}")]//td//a'
 # clicking on the tee time within the table
 driver.find_element(by=By.XPATH, value=text_xpath).click()
 # following the page through to book a 4 ball
-time.sleep(1)
 driver.find_element(by=By.XPATH, value='//*[@id="cluetip-inner"]/div[2]/form/em/input').click()
-
-
+time.sleep(1)
+driver.get(BOOKING_URL_WITH_DATE)
 
 
 # use this to ensure the page loads
