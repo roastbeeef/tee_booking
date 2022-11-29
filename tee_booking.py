@@ -1,37 +1,56 @@
-import requests
-import re
-from bs4 import BeautifulSoup
+import time
 from selenium import webdriver
-from selenium.webdriver.support.select import Select
 
 from src.credentials import USERNAME, PASSWORD
-from src.vars import full_auth_url, full_booking_url
-from src.funcs import system_log_in
-
-# TODO: get basic tee booking working using selenium chromedriver
-# TODO: make headless
-# TODO: schedule on AWS lambda
-# TODO: create web front-end
-# TODO: allow user log-in
-# TODO: allow scheduling for now or at soonest available point
-
-# dynamic variables
-booking_date = str("29-11-2022")
+from src.vars import FULL_AUTH_URL, FULL_BOOKING_URL
+from src.funcs import (
+        system_log_in, 
+        parse_html,
+        get_available_tee_times
+        )
 
 # setting up the chrome webdriver
-DRIVER = webdriver.Chrome(executable_path = r'../resources/chromedriver')
+driver = webdriver.Chrome(executable_path = r'../resources/chromedriver')
+
 
 # logging in to the webpage
-system_log_in(DRIVER, full_auth_url, USERNAME, PASSWORD)
+system_log_in(driver, FULL_AUTH_URL, USERNAME, PASSWORD)
+
+# TODO: booking date is to become a parameter later on
+BOOKING_DATE = '29-11-2022'
+BOOKING_URL_WITH_DATE = f'{FULL_BOOKING_URL}{BOOKING_DATE}'
+# parsing the HTML and getting a list of the available tee times. this wont be used now, but will be later on to validate
+parsed_html = parse_html(BOOKING_URL_WITH_DATE)
+
+# getting the available tee times - this is beyond MVP but will leave here for later
+available_tee_times = get_available_tee_times(parsed_html)
+
+from selenium.webdriver.common.by import By
+driver.get(BOOKING_URL_WITH_DATE)
+tee_time_mm = str('00')
+tee_time_hh = str('07')
+tee_time_str = f'teetime-mins-{tee_time_mm} teetime-hours-{tee_time_hh}'
+text_xpath = f'//tr[contains(@class, "{tee_time_str}")]//td'
+# clicking on the tee time within the table
+driver.find_element(by=By.XPATH, value=text_xpath).click()
+# following the page through to book a 4 ball
+time.sleep(1)
+driver.find_element(by=By.XPATH, value='//*[@id="cluetip-inner"]/div[2]/form/em/input').click()
 
 
-def get_time_to_book(desired_tee_date, 
-                     desired_tee_time, 
-                     days_in_advance,
-                     available_time):
-    # this function will get the time to book based on the soonest available booking date
-    # will be x days before desired booking datetime and at y time (the moment the booking system opens)
-    ...
+
+
+# use this to ensure the page loads
+# from selenium.webdriver.support import expected_conditions as EC
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.common.exceptions import TimeoutException
+# timeout = 5
+# driver.get(BOOKING_URL_WITH_DATE)
+# try:
+#     element_present = EC.presence_of_element_located((By.ID, 'element_id'))
+#     WebDriverWait(driver, timeout).until(element_present)
+# except TimeoutException:
+#     print("Timed out waiting for page to load")
 
 def check_log_in_status():
     # checks whether a user is logged in or not
@@ -43,19 +62,7 @@ def system_log_out():
 
 
 
-def get_available_tee_times(_soup):
-    """
-    Function to return a list of all currently available tee times.
-    Params:
-        soup: str
-    Returns:
-        tee_times_list: List of currently available tee times
-    """
-    time_length = 5
-    tee_times_list = []
-    for available_tee_time in _soup.find_all('td', re.compile("^bookable")):
-        tee_times_list.append(available_tee_time.get_text()[:time_length])
-    return tee_times_list
+
 
 def book_tee_time():
     # function to actually book a tee time based on the desired date
@@ -65,8 +72,8 @@ def add_users_to_tee_time():
     # function to add users to tee time
     ...
 
-tee_times_list = get_available_tee_times(soup)
-print(tee_times_list)
+# tee_times_list = get_available_tee_times(soup)
+# print(tee_times_list)
 
 
 # get the tee times and create a dictionary of the tee times and the item IDs
@@ -82,3 +89,13 @@ print(tee_times_list)
 
 
 # print(soup)
+
+
+# TODO: get basic tee booking working using selenium chromedriver - check
+# TODO: make headless
+# TODO: schedule on AWS lambda
+# TODO: create ci/cd pipeline
+# TODO: create web front-end
+# TODO: allow user log-in
+# TODO: allow scheduling for now or at soonest available point
+# TODO: dynamic scheduling. 10 days in advance
