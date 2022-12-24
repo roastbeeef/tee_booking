@@ -1,3 +1,5 @@
+## THIS FILE IS THE AUTOMATION SCRIPT
+
 import time
 from selenium import webdriver
 

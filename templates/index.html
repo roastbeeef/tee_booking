@@ -1,0 +1,116 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block styles %}
+{{ super() }}
+	<style>
+		body { background: #e8f1f9; }
+	</style>
+{% endblock %}
+
+
+{% block title %}
+Tee Booking Scheduler
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
+
+      <h1 class="pt-5 pb-2">Welcome to the sneaky tee booking scheduler!</h1>
+	  <h2 id="testing_current_date"></h2>
+      <p class="lead">Please use the form below to schedule in a tee time in advance of the standard booking schedule</p>
+
+	  <form method="POST">
+		<fieldset>
+		{{ form.csrf_token }}
+		<p>
+			{{ form.booking_date.label}}
+			{{ form.booking_date }}
+		</p>
+		<div id="booking_form_class" class="alert alert-danger">
+			<p>
+				{{ form.booking_time.label }}
+				{{ form.booking_time }}
+			</p>
+		</div>
+		<p>
+			<input type="submit", value="Submit">
+		</p>
+		</fieldset>
+	  </form>
+	  <script>
+		// sandpit - CURRENTLY WORKING ON A GREATER THAN DATE IN JS
+		var todays_date = new Date();
+		var string_date = new Date("2022-12-21");
+		var test_field = document.getElementById('testing_current_date')
+		var booking_date_field = document.getElementById('booking_date')
+		
+		booking_date_field.onchange = function() {
+			if (new Date(booking_date_field.value) > todays_date) {
+				test_field.innerText = "True"
+			}
+			else {
+				test_field.innerText = "False"
+		}};
+
+	  </script>
+	  <script>
+		// this is to make the div classes dynamic
+		let current_date = new Date();
+		let booking_form_class = document.getElementById('booking_form_class');
+		let booking_date = document.getElementById('booking_date');
+
+		if (Date(booking_date.value) > current_date) {
+			booking_form_class.className = "alert alert-warning"; 
+		}
+		else {
+			booking_form_class.className = "alert alert-success"
+		}
+	  </script>
+
+	  <script>
+		// this is to inject the HTML to update the tee times
+		let booking_date_select = document.getElementById('booking_date');
+		let booking_time_select = document.getElementById('booking_time');
+
+		booking_date_select.onchange = function() {
+			booking_date = booking_date_select.value;
+			
+			fetch('/booking_time/' + booking_date).then(function(response) {
+
+				response.json().then(function(data) {
+					let optionHTML = '';
+
+					for (let booking_time of data.booking_times) {
+						optionHTML += '<option value="' + booking_time.id + '">' + booking_time.name + '</option>';
+					}
+					booking_time_select.innerHTML = optionHTML;
+				});
+			});
+		}
+	  </script>
+
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+<!--
+	TIPS about using Flask-Bootstrap:
+	Flask-Bootstrap keeps the default Bootstrap stylesheet in the
+	env/lib/python3.8/site-packages/flask_bootstrap/static/css/ directory.
+	You can replace the CSS file. HOWEVER, when you reinstall requirements
+	for your project, you would overwrite all the Bootstrap files
+	with the defaults.
+	Flask-Bootstrap templates are in
+	env/lib/python3.8/site-packages/flask_bootstrap/static/templates
+	Modifying the Bootstrap base.html template: use directives and
+	Jinja2's super() function. See Jinja2 documentation and also this:
+	https://pythonhosted.org/Flask-Bootstrap/basic-usage.html
+-->
