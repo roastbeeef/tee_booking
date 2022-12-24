@@ -11,7 +11,7 @@ import requests
 
 # internal imports
 # from front_end.data import ACTORS
-from tee_booking.src.funcs import (
+from src.funcs import (
     get_names, 
     get_id,
     parse_html, 
@@ -29,7 +29,7 @@ city_data['city'] = cities
 city_data.reset_index(inplace=True)
 
 # globals
-from tee_booking.src.vars import FULL_BOOKING_URL
+from src.vars import FULL_BOOKING_URL
 # TEMPLATE_DIR = os.path.abspath('../../frontend/src')
 
 app = Flask(__name__)
@@ -60,7 +60,7 @@ Bootstrap(app)
 
 class BookingForm(FlaskForm):
     name = StringField('Please enter your name', validators=[DataRequired()])
-    booking_date = DateField('Please pick your desired date', default=DEFAULT_DATE)
+    booking_date = DateField('Please pick your desired date', default=DEFAULT_DATE, validators=[DataRequired()])
     booking_time = SelectField('Please enter your desired tee time', validators=[DataRequired()])
     # submit = SubmitField('Submit')
 

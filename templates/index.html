@@ -42,23 +42,26 @@ Tee Booking Scheduler
 		</p>
 		</fieldset>
 	  </form>
-	  <script>
+	  <!-- <script>
 		// sandpit - CURRENTLY WORKING ON A GREATER THAN DATE IN JS
 		var todays_date = new Date();
-		var string_date = new Date("2022-12-21");
-		var test_field = document.getElementById('testing_current_date')
-		var booking_date_field = document.getElementById('booking_date')
-		
-		booking_date_field.onchange = function() {
-			if (new Date(booking_date_field.value) > todays_date) {
-				test_field.innerText = "True"
+		var string_date = new Date("2022-12-25");
+		var test_field = document.getElementById('testing_current_date');
+		var booking_date_select = document.getElementById('booking_date');
+
+		booking_date_select.onchange = function() {
+			booking_date = booking_date_select.value;
+
+			if (booking_date > todays_date) {
+				test_field.innerText = "True";
 			}
 			else {
-				test_field.innerText = "False"
-		}};
+				test_field.innerText = "False";
+			}
+		}
 
-	  </script>
-	  <script>
+	  </script> -->
+	  <!-- <script>
 		// this is to make the div classes dynamic
 		let current_date = new Date();
 		let booking_form_class = document.getElementById('booking_form_class');
@@ -70,7 +73,7 @@ Tee Booking Scheduler
 		else {
 			booking_form_class.className = "alert alert-success"
 		}
-	  </script>
+	  </script> -->
 
 	  <script>
 		// this is to inject the HTML to update the tee times
