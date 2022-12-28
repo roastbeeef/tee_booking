@@ -11,25 +11,15 @@ import requests
 
 # internal imports
 # from front_end.data import ACTORS
-from src.funcs import (
+from tee_booking.src.funcs import (
     get_names, 
     get_id,
     parse_html, 
     get_available_tee_times
 )
 
-# remove this once prototyping is done - this is just to simulate the db query from the lecture
-import pandas as pd
-states = ['CA', 'CA', 'CA', 'NV', 'NV']
-cities = ['San Francisco', 'San Diego', 'Los Angeles', 'Reno', 'Las Vegas']
-
-city_data = pd.DataFrame(columns=['state', 'city'])
-city_data['state'] = states
-city_data['city'] = cities
-city_data.reset_index(inplace=True)
-
 # globals
-from src.vars import FULL_BOOKING_URL
+from tee_booking.src.vars import FULL_BOOKING_URL
 # TEMPLATE_DIR = os.path.abspath('../../frontend/src')
 
 app = Flask(__name__)
@@ -45,8 +35,8 @@ BOOKING_URL_WITH_DATE = f'{FULL_BOOKING_URL}{BOOKING_DATE}'
 
 
 # grabbing the available tee times from the MSGC site
-
-DEFAULT_DATE_STR = "2022-12-24"
+# DEFAULT_DATE_STR = datetime.today().date().strftime("%Y-%m-%d")
+DEFAULT_DATE_STR = "2022-12-27"
 DEFAULT_DATE = datetime.strptime(DEFAULT_DATE_STR, "%Y-%m-%d").date()
 
 
@@ -57,26 +47,11 @@ Bootstrap(app)
 # "NameForm" can change; "(FlaskForm)" cannot
 # see the route for "/" and "index.html" to see how this is used
 
-
 class BookingForm(FlaskForm):
-    name = StringField('Please enter your name', validators=[DataRequired()])
-    booking_date = DateField('Please pick your desired date', default=DEFAULT_DATE, validators=[DataRequired()])
-    booking_time = SelectField('Please enter your desired tee time', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
+    booking_date = DateField('Date:', default=DEFAULT_DATE, validators=[DataRequired()])
+    booking_time = SelectField('Time:', validators=[DataRequired()])
     # submit = SubmitField('Submit')
-
-
-class TestDynamicForm(FlaskForm):
-    # values
-    state_choices = [('CA', 'California'), ('NV', 'Nevada')]
-
-    # fields
-    state = SelectField('state', choices=state_choices)
-    city = SelectField('city', choices=[])
-
-
-# class TestForm(FlaskForm):
-#     state = SelectField('state', choices=[('CA', 'california'), ('NV', 'nevada')])
-#     city = SelectField('city', choices=[])
 
 # all Flask routes below
 @app.route('/', methods=['GET', 'POST'])
@@ -93,7 +68,6 @@ def index():
     # once complete, this is superfluous, but required for testing
     if request.method == 'POST':
         # this should be returning data from the database - which is actually the mid sussex website
-        # city = city_data.loc[city_data['index'] == form.booking_time.data, 'city'][0].item()
         return f'<h1>Booking date: {form.booking_date.data}. Booking time: {form.booking_time.data}'
 
     return render_template('index.html', form=form)
@@ -117,31 +91,9 @@ def booking_time(booking_date):
 
     return jsonify({'booking_times': booking_times_array})
 
-# how do i get the tee time back to the original route? right now its just showing the reference
-# can always try and parse the html again
+@app.route('/login')
+def login():
+    return render_template('login.html')
 
-# @app.route('/actor/<id>')
-# def actor(id):
-#     # run function to get actor data based on the id in the path
-#     id, name, photo = get_actor(ACTORS, id)
-#     if name == "Unknown":
-#         # redirect the browser to the error template
-#         return render_template('./front_end/templates/404.html'), 404
-#     else:
-#         # pass all the data for the selected actor to the template
-#         return render_template('./front_end/templates/actor.html', id=id, name=name, photo=photo)
-
-# 2 routes to handle errors - they have templates too
-
-# @app.errorhandler(404)
-# def page_not_found(e):
-#     return render_template('./front_end/templates/404.html'), 404
-
-# @app.errorhandler(500)
-# def internal_server_error(e):
-#     return render_template('./front_end/templates/500.html'), 500
-
-
-# keep this as is
 if __name__ == '__main__':
     app.run(debug=True)

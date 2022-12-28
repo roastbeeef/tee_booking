@@ -20,81 +20,123 @@ Tee Booking Scheduler
   <div class="row">
     <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
 
-      <h1 class="pt-5 pb-2">Welcome to the sneaky tee booking scheduler!</h1>
-	  <h2 id="testing_current_date"></h2>
-      <p class="lead">Please use the form below to schedule in a tee time in advance of the standard booking schedule</p>
-
-	  <form method="POST">
-		<fieldset>
-		{{ form.csrf_token }}
-		<p>
-			{{ form.booking_date.label}}
-			{{ form.booking_date }}
-		</p>
-		<div id="booking_form_class" class="alert alert-danger">
-			<p>
+      <h1 class="pt-5 pb-2">Advance Tee Booking System</h1>
+      <p class="lead" style="font-size:100%;">Please use the form below to schedule in a tee time in advance of the standard booking schedule</p>
+	  <h1 id="test_status"></h1>
+	  <form class="form-inline" method="POST">
+		<div id="booking_form_class" class="alert alert-dark" role="alert">
+			<fieldset>
+			{{ form.csrf_token }}
+			<p id="booking_date_field">
+				{{ form.booking_date.label}}
+				{{ form.booking_date }}
+			</p>
+			<!-- find a way of making this invisible until a date is available-->
+			<p id="booking_time_field_active">
 				{{ form.booking_time.label }}
 				{{ form.booking_time }}
 			</p>
-		</div>
-		<p>
-			<input type="submit", value="Submit">
-		</p>
+			<p id="booking_time_field_inactive" style="display: none;">
+				There are no tee times available.
+			</p>
+			<p id="test_field" style="display: none;">
+				Test Field
+			</p>
+			<p>
+				<input type="submit", value="Submit">
+			</p>
+			</div>
 		</fieldset>
-	  </form>
-	  <!-- <script>
-		// sandpit - CURRENTLY WORKING ON A GREATER THAN DATE IN JS
-		var todays_date = new Date();
-		var string_date = new Date("2022-12-25");
-		var test_field = document.getElementById('testing_current_date');
-		var booking_date_select = document.getElementById('booking_date');
-
-		booking_date_select.onchange = function() {
-			booking_date = booking_date_select.value;
-
-			if (booking_date > todays_date) {
-				test_field.innerText = "True";
-			}
-			else {
-				test_field.innerText = "False";
-			}
-		}
-
-	  </script> -->
-	  <!-- <script>
-		// this is to make the div classes dynamic
-		let current_date = new Date();
-		let booking_form_class = document.getElementById('booking_form_class');
-		let booking_date = document.getElementById('booking_date');
-
-		if (Date(booking_date.value) > current_date) {
-			booking_form_class.className = "alert alert-warning"; 
-		}
-		else {
-			booking_form_class.className = "alert alert-success"
-		}
-	  </script> -->
-
 	  <script>
 		// this is to inject the HTML to update the tee times
+		// if json is null then NO BOOKING TIMES AVAILABLE
+		// 
+		var todays_date = new Date();
+		// other vars
 		let booking_date_select = document.getElementById('booking_date');
 		let booking_time_select = document.getElementById('booking_time');
+		let booking_form_class = document.getElementById('booking_form_class');
+		var booking_form_time_selectfield = document.getElementById('booking_time_field_active');
+		var booking_form_time_selectmsg = document.getElementById('booking_time_field_inactive');
 
-		booking_date_select.onchange = function() {
-			booking_date = booking_date_select.value;
-			
-			fetch('/booking_time/' + booking_date).then(function(response) {
+		// need a way of selecting the starting state!
 
-				response.json().then(function(data) {
-					let optionHTML = '';
+		// state 0: booking is inactive. is in the past or no tee times available. DANGER & HIDDEN.
+		// state 1: booking is active. is not in the past, tee times are available to book now. SUCCESS & ACTIVE.
+		// state 2: booking is active. is not in hte past, tee times are available to pre-book. WARNING & ACTIVE.
 
-					for (let booking_time of data.booking_times) {
-						optionHTML += '<option value="' + booking_time.id + '">' + booking_time.name + '</option>';
-					}
-					booking_time_select.innerHTML = optionHTML;
-				});
-			});
+		// todo: 1) fix current state, fix other states, fix submission. ticket done.
+		// repeated code is bad, but fix it later. who cares for now.
+
+		// move all JS into its own file: https://www.digitalocean.com/community/tutorials/how-to-add-javascript-to-html
+
+		// parses the JSON for tee booking converts it into a HTML object 
+		async function getBookingTimeOptions(bookingDateStr) {
+			const response = await fetch(`/booking_time/${bookingDateStr}`);
+			const data = await response.json();
+
+			let optionHTML = '';
+			for (let booking_time of data.booking_times) {
+				optionHTML += `<option value="${booking_time.id}">${booking_time.name}</option>`;
+			}
+			return optionHTML
 		}
+
+		// function updateBookingForm(bookingDateDt, bookingTimes) {
+		// 	let currentState;
+		// 	if (bookingDateDt < todays_date || bookingTimes.length == 0) {
+		// 		currentState = 0;
+		// 	} else if (bookingDateDt >= todays_date || bookingTimes.length > 0) {
+		// 		currentState = 1;
+		// 	} else if (bookingDateDt >= todays_date || bookingTimes.length > 0) {
+		// 		currentState = 2;
+		// 	}
+
+		// 	if (currentState === 0) {
+		// 		booking_form_class.className = "alert alert-danger";
+		// 		document.getElementById("test_field").innerText = "No booking times available";
+		// 		booking_form_time_selectfield.style = "display: none;";
+		// 	} else if (currentState === 1) {
+		// 		booking_form_class.className = "alert alert-success";
+		// 		document.getElementById("test_field").innerText = "";
+		// 		booking_form_time_selectfield.style = "";
+		// 	} else if (currentState === 2) {
+		// 		booking_form_class.className = "alert alert-warning";
+		// 		document.getElementById("test_field").innerText = "";
+		// 		booking_form_time_selectfield.style = "";
+		// 	} else {
+		// 		// well, this is fucked.
+		// 	}
+		// }
+
+		// this populates the SelectField on page load
+		window.onload = async function () {
+			const booking_date_str = booking_date_select.value; // this should come from python
+			const booking_date_dt = new Date(booking_date_str);
+			getBookingTimeOptions(booking_date_str).then(html => booking_time_select.innerHTML = html);
+
+			var available_tee_times = booking_time_select.innerHTML.length > 0;
+			if (available_tee_times) {
+				booking_form_class.className = "alert alert-success";
+			} else {
+				booking_form_class.className = "alert alert-danger";
+			};
+		};
+
+		// this populates the SelectField on update of the DateField
+		booking_date_select.onchange = async function () {
+			const booking_date_str = booking_date_select.value;
+			const booking_date_dt = new Date(booking_date_str);
+			getBookingTimeOptions(booking_date_str).then(html => booking_time_select.innerHTML = html);
+
+			var available_tee_times = booking_time_select.innerHTML.length > 0;
+			if (available_tee_times) {
+				booking_form_class.className = "alert alert-success";
+			} else {
+				booking_form_class.className = "alert alert-danger";
+			};
+		};
+
 	  </script>
 
 
