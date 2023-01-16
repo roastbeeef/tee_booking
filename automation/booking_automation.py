@@ -100,3 +100,47 @@ def add_users_to_tee_time():
 # TODO: allow user log-in
 # TODO: allow scheduling for now or at soonest available point
 # TODO: dynamic scheduling. 10 days in advance
+
+
+from tee_booking.src.funcs import AdvanceTeeBooking
+from tee_booking.src.vars import url_base
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+chrome_options = Options()
+chrome_options.headless = True
+cdriver = webdriver.Chrome(executable_path = r'../resources/chromedriver', options=chrome_options)
+
+
+atb = AdvanceTeeBooking(webdriver_loc=cdriver, url=url_base)
+
+atb.system_log_in(username='mattwilsn@gmail.com', password='6503', login_page='login.php')
+
+cdriver.quit()
+
+
+
+2
+
+
+from bs4 import BeautifulSoup as bs4
+import requests
+import ssl
+ssl.match_hostname = lambda cert, hostname: True
+
+usr_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
+
+URL = 'http://midsussexgolfclub.co.uk/'
+LOGIN_ROUTE = 'login.php'
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36', 
+    'origin': URL, 
+    'referer': URL + LOGIN_ROUTE}
+
+
+s = requests.session()
+login_req = s.post(URL + LOGIN_ROUTE, headers=LOGIN_HEADERS, data=LOGIN_PAYLOAD)
+
+print(login_req.status_code)
+
+
