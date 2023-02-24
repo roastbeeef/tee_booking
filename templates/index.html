@@ -1,4 +1,4 @@
-{% extends 'bootstrap/base.html' %}
+{% extends 'layouts.html' %}
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block styles %}
@@ -13,14 +13,13 @@
 Tee Booking Scheduler
 {% endblock %}
 
-
 {% block content %}
-
 <div class="container">
   <div class="row">
     <div class="col-md-10 col-lg-8 mx-lg-auto mx-md-auto">
 
       <h1 class="pt-5 pb-2">Advance Tee Booking System</h1>
+	<p class="", id="welcome">Welcome, {{user}}</p>
       <p class="lead" style="font-size:100%;">Please use the form below to schedule in a tee time in advance of the standard booking schedule</p>
 	  <h1 id="test_status"></h1>
 	  <form class="form-inline" method="POST">
@@ -32,18 +31,15 @@ Tee Booking Scheduler
 				{{ form.booking_date }}
 			</p>
 			<!-- find a way of making this invisible until a date is available-->
-			<p id="booking_time_field_active">
+			<p id="booking_time_field">
 				{{ form.booking_time.label }}
 				{{ form.booking_time }}
 			</p>
-			<p id="booking_time_field_inactive" style="display: none;">
-				There are no tee times available.
-			</p>
 			<p id="test_field" style="display: none;">
-				Test Field
+				No tee times available
 			</p>
 			<p>
-				<input type="submit", value="Submit">
+				{{ form.submit }}
 			</p>
 			</div>
 		</fieldset>
@@ -53,11 +49,10 @@ Tee Booking Scheduler
 		// 
 		var todays_date = new Date();
 		// other vars
-		let booking_date_select = document.getElementById('booking_date');
-		let booking_time_select = document.getElementById('booking_time');
+		let booking_date_selection = document.getElementById('booking_date');
+		let booking_time_selection = document.getElementById('booking_time');
+		let booking_time_field = document.getElementById('booking_time_field');
 		let booking_form_class = document.getElementById('booking_form_class');
-		var booking_form_time_selectfield = document.getElementById('booking_time_field_active');
-		var booking_form_time_selectmsg = document.getElementById('booking_time_field_inactive');
 
 		// need a way of selecting the starting state!
 
@@ -71,8 +66,9 @@ Tee Booking Scheduler
 		// move all JS into its own file: https://www.digitalocean.com/community/tutorials/how-to-add-javascript-to-html
 
 		// parses the JSON for tee booking converts it into a HTML object 
-		async function getBookingTimeOptions(bookingDateStr) {
-			const response = await fetch(`/booking_time/${bookingDateStr}`);
+
+		async function getBookingTimeOptions(booking_date_str) {
+			const response = await fetch(`/booking_time/${booking_date_str}`);
 			const data = await response.json();
 
 			let optionHTML = '';
@@ -82,59 +78,60 @@ Tee Booking Scheduler
 			return optionHTML
 		}
 
-		// function updateBookingForm(bookingDateDt, bookingTimes) {
-		// 	let currentState;
-		// 	if (bookingDateDt < todays_date || bookingTimes.length == 0) {
-		// 		currentState = 0;
-		// 	} else if (bookingDateDt >= todays_date || bookingTimes.length > 0) {
-		// 		currentState = 1;
-		// 	} else if (bookingDateDt >= todays_date || bookingTimes.length > 0) {
-		// 		currentState = 2;
-		// 	}
+		function getBookingTimes(booking_date_str) {
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', `/booking_time/${booking_date_str}`, false);
+			xhr.send();
+			if (xhr.status == 200) {
+				var response = xhr.responseText;
+				var data = JSON.parse(response);
+				return data.booking_times;
+			}
+		}
 
-		// 	if (currentState === 0) {
-		// 		booking_form_class.className = "alert alert-danger";
-		// 		document.getElementById("test_field").innerText = "No booking times available";
-		// 		booking_form_time_selectfield.style = "display: none;";
-		// 	} else if (currentState === 1) {
-		// 		booking_form_class.className = "alert alert-success";
-		// 		document.getElementById("test_field").innerText = "";
-		// 		booking_form_time_selectfield.style = "";
-		// 	} else if (currentState === 2) {
-		// 		booking_form_class.className = "alert alert-warning";
-		// 		document.getElementById("test_field").innerText = "";
-		// 		booking_form_time_selectfield.style = "";
-		// 	} else {
-		// 		// well, this is fucked.
-		// 	}
-		// }
-
-		// this populates the SelectField on page load
+		// this populates the SelectField on page load - this is chained, which is bad. convert to async later
 		window.onload = async function () {
-			const booking_date_str = booking_date_select.value; // this should come from python
-			const booking_date_dt = new Date(booking_date_str);
-			getBookingTimeOptions(booking_date_str).then(html => booking_time_select.innerHTML = html);
+			const booking_date_str = booking_date_selection.value; // this should come from python
+			let booking_time_options_html = getBookingTimeOptions(booking_date_str);
+			let booking_times_count = getBookingTimes(booking_date_str).length;
+			booking_time_options_html.then(html => booking_time_selection.innerHTML = html);
 
-			var available_tee_times = booking_time_select.innerHTML.length > 0;
-			if (available_tee_times) {
+			var tee_times_unavailable = (booking_times_count == 0)
+			var tee_times_available = (booking_times_count != 0)
+
+			if (tee_times_available) {
+				document.getElementById('test_field').style = "display: none;";
+				booking_time_field.style = "";
 				booking_form_class.className = "alert alert-success";
 			} else {
+				document.getElementById('test_field').style = ""
+				booking_time_field.style = "display: none;";
 				booking_form_class.className = "alert alert-danger";
-			};
+			}
+			
 		};
 
 		// this populates the SelectField on update of the DateField
-		booking_date_select.onchange = async function () {
-			const booking_date_str = booking_date_select.value;
-			const booking_date_dt = new Date(booking_date_str);
-			getBookingTimeOptions(booking_date_str).then(html => booking_time_select.innerHTML = html);
+		booking_date_selection.onchange = async function () {
+			const booking_date_str = booking_date_selection.value; // this should come from python
+			let booking_time_options_html = getBookingTimeOptions(booking_date_str);
+			let booking_times_count = getBookingTimes(booking_date_str).length;
+			booking_time_options_html.then(html => booking_time_selection.innerHTML = html);
+			
+			// document.getElementById('test_field').innerText = booking_times_count.length
 
-			var available_tee_times = booking_time_select.innerHTML.length > 0;
-			if (available_tee_times) {
+			var tee_times_unavailable = (booking_times_count == 0)
+			var tee_times_available = (booking_times_count != 0)
+
+			if (tee_times_available) {
+				document.getElementById('test_field').style = "display: none;";
+				booking_time_field.style = "";
 				booking_form_class.className = "alert alert-success";
 			} else {
+				document.getElementById('test_field').style = ""
+				booking_time_field.style = "display: none;";
 				booking_form_class.className = "alert alert-danger";
-			};
+			}
 		};
 
 	  </script>
@@ -143,8 +140,7 @@ Tee Booking Scheduler
     </div>
   </div>
 </div>
-
-{% endblock %}
+{% endblock content %}
 
 <!--
 	TIPS about using Flask-Bootstrap:
