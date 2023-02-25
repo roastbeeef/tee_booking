@@ -28,7 +28,8 @@ from flask_login import (
 # internal imports
 # from front_end.data import ACTORS
 from tee_booking.src.funcs import (
-    AdvanceTeeBooking
+    AdvanceTeeBooking,
+    DecimalEncoder
 )
 from tee_booking.src.forms import (
     BookingForm,
@@ -75,9 +76,6 @@ app.config['SECRET_KEY'] = 'C2HWGVoMGfNTBsrYQg8EcMrdTimkZfAb'
 # remember to parameterise this later
 BOOKING_HORIZON = 2
 # BOOKING_DATE = datetime.strftime(datetime.today()+timedelta(days=BOOKING_HORIZON), "%Y-%m-%d")
-DATE_TODAY = datetime.strftime(datetime.today(), "%Y-%m-%d")
-BOOKING_DATE = DATE_TODAY # placeholder
-BOOKING_URL_WITH_DATE = f'{FULL_BOOKING_URL}{BOOKING_DATE}'
 
 # Flask-Bootstrap requires this line
 Bootstrap(app)
@@ -112,8 +110,6 @@ def booking_form():
         
         """
         TODO: this is the point in which the file gets written to dynamo
-        TODO: before the below, add a nav bar, burger menu and "my bookings" page
-        TODO: also create another route that has a jQuery table showing the contents
         """
 
         booking_payload = atb.create_tee_booking_transaction(
@@ -133,8 +129,6 @@ def booking_form():
     return render_template('index.html', form=form, user='Matt')
 
 
-
-import sys
 @app.route('/tee_bookings')
 def view_bookings():
     # TODO: add filtering system to allow user to scan their bookings

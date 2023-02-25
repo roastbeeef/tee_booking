@@ -3,8 +3,19 @@ import boto3
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from tee_booking.src.credentials import USERNAME, PASSWORD
 
+# club vars - handled by login
+from .credentials import (
+    USERNAME, 
+    PASSWORD
+)
+
+### aws vars - shift to secrets manager
+from .secrets import (
+    aws_region,
+    access_key,
+    secret_access_key
+)
 # chromedriver location
 chrome_options = Options()
 chrome_options.headless = True
@@ -21,7 +32,7 @@ FULL_AUTH_URL = url_base + url_authentication_ext
 FULL_LOGIN_URL = url_base + url_authentication_ext
 
 # DEFAULT_DATE_STR = datetime.today().date().strftime("%Y-%m-%d")
-DEFAULT_DATE_STR = "2023-01-26"
+DEFAULT_DATE_STR = "2023-02-28"
 DEFAULT_DATE = datetime.strptime(DEFAULT_DATE_STR, "%Y-%m-%d").date()
 
 # authentication
@@ -35,13 +46,6 @@ LOGIN_PAYLOAD = {
         'memberid': USERNAME,
         'pin': PASSWORD
         }
-
-### db vars
-from tee_booking.src.secrets import (
-    aws_region,
-    access_key,
-    secret_access_key
-)
 
 TRANSACTIONS_TABLES_NAME = "teebooking-transactions"
 USERS_TABLE_NAME = "teebooking-users"

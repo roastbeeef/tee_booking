@@ -30,22 +30,24 @@
 # booking on lambda
 
 
-import boto3
-from boto3.dynamodb.conditions import Attr
-from src.secrets import (
-    aws_region,
-    access_key,
-    secret_access_key
-)
-TABLE_NAME = "teebooking-transactions"
-dynamo_client = boto3.resource(
-    service_name = 'dynamodb',
-    region_name = aws_region,
-    aws_access_key_id = access_key,
-    aws_secret_access_key = secret_access_key
-    )
+# this works but returns nothing
+from src.vars import FULL_BOOKING_URL, url_base, DRIVER, LOGIN_PAYLOAD
+# from src.funcs import AdvanceTeeBooking
+booking_url = f"{FULL_BOOKING_URL}27-02-2022"
 
-table = dynamo_client.Table(TABLE_NAME)
+# atb = AdvanceTeeBooking(webdriver_loc=DRIVER, url=url_base)
 
-response = table.scan(FilterExpression=Attr('username').eq('testing'))
-print(response['Items'])
+# tee_times = atb.get_available_tee_times(booking_url, LOGIN_PAYLOAD)
+# print(tee_times)
+
+
+
+# atb.login_and_scrape_page(booking_url, payload=LOGIN_PAYLOAD)
+
+
+import requests
+from bs4 import BeautifulSoup
+response = requests.get("https://www.midsussexgolfclub.co.uk/memberbooking/?date=27-02-2023").text
+soup = BeautifulSoup(response, 'html.parser')
+
+print(soup)
