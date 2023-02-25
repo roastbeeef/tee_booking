@@ -88,8 +88,7 @@ Tee Booking Scheduler
 				return data.booking_times;
 			}
 		}
-
-		// this populates the SelectField on page load - this is chained, which is bad. convert to async later
+		// this populates the SelectField on page load - convert to async later
 		window.onload = async function () {
 			const booking_date_str = booking_date_selection.value; // this should come from python
 			let booking_time_options_html = getBookingTimeOptions(booking_date_str);
